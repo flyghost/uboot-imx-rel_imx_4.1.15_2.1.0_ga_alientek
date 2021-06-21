@@ -2,11 +2,11 @@
 # SPDX-License-Identifier:	GPL-2.0+
 #
 
-VERSION = 2016
-PATCHLEVEL = 03
-SUBLEVEL =
-EXTRAVERSION =
-NAME =
+VERSION = 2016		# 主版本号
+PATCHLEVEL = 03		# 补丁版本号
+SUBLEVEL =			# 次版本号，上面三个共同构成了uboot的版本号
+EXTRAVERSION =		# 附加版本信息，一般不使用
+NAME =				# 和名字有关，一般不使用
 
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
@@ -17,6 +17,9 @@ NAME =
 # o Do not use make's built-in rules and variables
 #   (this increases performance and avoids hard-to-debug behaviour);
 # o Look for make include files relative to root of kernel src
+# -rR 表示禁止使用内置的隐含规则和变量定义
+# --include-dir 指明搜索路径
+# $(CURDIR) 表示当前目录
 MAKEFLAGS += -rR --include-dir=$(CURDIR)
 
 # Avoid funny character set dependencies
@@ -70,6 +73,8 @@ unexport GREP_OPTIONS
 # To put more focus on warnings, be less verbose as default
 # Use 'make V=1' to see the full commands
 
+# origin：返回变量的来源，是否来自命令行，然后判断V的值
+# V=1:实现完整的命令输出，否则只有简单的输出
 ifeq ("$(origin V)", "command line")
   KBUILD_VERBOSE = $(V)
 endif
