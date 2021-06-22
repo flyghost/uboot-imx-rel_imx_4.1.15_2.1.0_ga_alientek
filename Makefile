@@ -419,6 +419,7 @@ export RCS_TAR_IGNORE := --exclude SCCS --exclude BitKeeper --exclude .svn \
 PHONY += scripts_basic
 # @make -f ./scripts/Makefile.build obj=scripts/basic //也可以没有@，视配置而定
 # @rm -f . tmp_quiet_recordmcount                     //也可以没有@
+# 最终的目标是编译出 scripts/basic/fixdep 这个软件
 scripts_basic:
 	$(Q)$(MAKE) $(build)=scripts/basic
 	$(Q)rm -f .tmp_quiet_recordmcount

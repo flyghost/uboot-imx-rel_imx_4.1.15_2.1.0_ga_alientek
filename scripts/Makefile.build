@@ -54,7 +54,12 @@ include scripts/Kbuild.include
 save-cflags := $(CFLAGS)
 
 # The filename Kbuild has precedence over Makefile
+# $(if $(filter /%, scripts/basic), scripts/basic, ./scripts/basic)
+# kbuild-dir := ./scripts/basic
 kbuild-dir := $(if $(filter /%,$(src)),$(src),$(srctree)/$(src))
+
+# kbuild-file := $(if $(wildcard ./scripts/basic/Kbuild), ./scripts/basic/Kbuild, ./scripts/basic/Makefile)
+# kbuild-file := include ./scripts/basic/Makefile # 读取scripts/basic下的Makefile文件
 kbuild-file := $(if $(wildcard $(kbuild-dir)/Kbuild),$(kbuild-dir)/Kbuild,$(kbuild-dir)/Makefile)
 include $(kbuild-file)
 
@@ -112,7 +117,8 @@ endif
 modorder-target := $(obj)/modules.order
 
 # We keep a list of all modules in $(MODVERDIR)
-
+# __build: $(builtin-target) $(lib-target) $(extra-y)) $(subdir-ym) $(always)
+# __build: scripts/basic/fixdep
 __build: $(if $(KBUILD_BUILTIN),$(builtin-target) $(lib-target) $(extra-y)) \
 	 $(if $(KBUILD_MODULES),$(obj-m) $(modorder-target)) \
 	 $(subdir-ym) $(always)
