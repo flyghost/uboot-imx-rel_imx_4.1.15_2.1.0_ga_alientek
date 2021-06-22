@@ -7,11 +7,11 @@
 
 # Modified for U-Boot
 prefix := tpl
-src := $(patsubst $(prefix)/%,%,$(obj))
-ifeq ($(obj),$(src))
+src := $(patsubst $(prefix)/%,%,$(obj)) # src := script/bisic
+ifeq ($(obj),$(src)) # 成立
 prefix := spl
 src := $(patsubst $(prefix)/%,%,$(obj))
-ifeq ($(obj),$(src))
+ifeq ($(obj),$(src)) # 成立
 prefix := .
 endif
 endif

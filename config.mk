@@ -43,6 +43,7 @@ endif
 # CPU-specific code.
 CPUDIR=arch/$(ARCH)/cpu$(if $(CPU),/$(CPU),)
 
+# sinclude 和 include 功能类似，都是读取指定文件内容，但是 sinclude 读取的文件不存在的话不会报错
 sinclude $(srctree)/arch/$(ARCH)/config.mk	# include architecture dependend rules
 sinclude $(srctree)/$(CPUDIR)/config.mk		# include  CPU	specific rules
 

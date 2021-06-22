@@ -93,8 +93,8 @@ endif
 # If the user is running make -s (silent mode), suppress echoing of
 # commands
 
-ifneq ($(filter 4.%,$(MAKE_VERSION)),)	# make-4
-ifneq ($(filter %s ,$(firstword x$(MAKEFLAGS))),)
+ifneq ($(filter 4.%,$(MAKE_VERSION)),)				# make-4 ，判断编译器版本，是否不为空
+ifneq ($(filter %s ,$(firstword x$(MAKEFLAGS))),)	# 获取x$(MAKEFLAGS)第一个单词，是否不为空
   quiet=silent_
 endif
 else					# make-3.8x
@@ -122,11 +122,11 @@ export quiet Q KBUILD_VERBOSE
 
 # KBUILD_SRC is set on invocation of make in OBJ directory
 # KBUILD_SRC is not intended to be used by the regular user (for now)
-ifeq ($(KBUILD_SRC),)
+ifeq ($(KBUILD_SRC),)				# KBUILD_SRC 为空
 
 # OK, Make called in directory where kernel src resides
 # Do we want to locate output files in a separate directory?
-ifeq ("$(origin O)", "command line")
+ifeq ("$(origin O)", "command line")	# O 来自命令行
   KBUILD_OUTPUT := $(O)
 endif
 
@@ -137,10 +137,11 @@ _all:
 # Cancel implicit rules on top Makefile
 $(CURDIR)/Makefile Makefile: ;
 
-ifneq ($(KBUILD_OUTPUT),)
+ifneq ($(KBUILD_OUTPUT),)	# KBUILD_SRC 不为空
 # Invoke a second make in the output directory, passing relevant variables
 # check that the output directory actually exists
 saved-output := $(KBUILD_OUTPUT)
+# 创建OBJ目录，同时将该目录的绝对路径赋值给 KBUILD_OUTPUT
 KBUILD_OUTPUT := $(shell mkdir -p $(KBUILD_OUTPUT) && cd $(KBUILD_OUTPUT) \
 								&& /bin/pwd)
 $(if $(KBUILD_OUTPUT),, \
@@ -178,7 +179,9 @@ MAKEFLAGS += --no-print-directory
 # See the file "Documentation/sparse.txt" for more details, including
 # where to get the "sparse" utility.
 
-ifeq ("$(origin C)", "command line")
+# C = 1 使能代码检查，检查所有需要重新编译的文件
+# C = 2 检查所有的源文件
+ifeq ("$(origin C)", "command line") # 判断C是否来自于命令行
   KBUILD_CHECKSRC = $(C)
 endif
 ifndef KBUILD_CHECKSRC
@@ -188,24 +191,27 @@ endif
 # Use make M=dir to specify directory of external module to build
 # Old syntax make ... SUBDIRS=$PWD is still supported
 # Setting the environment variable KBUILD_EXTMOD take precedence
+# 单独编译某个模块
+
+# 是否定义SUBDIRS，为了支持老的语法 make SUBDIRS=dir
 ifdef SUBDIRS
   KBUILD_EXTMOD ?= $(SUBDIRS)
 endif
-
+# M是否来自命令行
 ifeq ("$(origin M)", "command line")
-  KBUILD_EXTMOD := $(M)
+  KBUILD_EXTMOD := $(M)		# 模块的目录
 endif
 
 # If building an external module we do not care about the all: rule
 # but instead _all depend on modules
 PHONY += all
-ifeq ($(KBUILD_EXTMOD),)
+ifeq ($(KBUILD_EXTMOD),)	# 如果单独模块的目录为空，则目标_all依赖all
 _all: all
-else
+else						# 否则目标依赖modules
 _all: modules
 endif
 
-ifeq ($(KBUILD_SRC),)
+ifeq ($(KBUILD_SRC),)		# 判断KBUILD_SRC是否为空，一般不设置该值，也就是为空
         # building in the source tree
         srctree := .
 else
@@ -216,6 +222,7 @@ else
                 srctree := $(KBUILD_SRC)
         endif
 endif
+# obj树为当前跟目录
 objtree		:= .
 src		:= $(srctree)
 obj		:= $(objtree)
@@ -228,7 +235,10 @@ export srctree objtree VPATH
 unexport CDPATH
 
 #########################################################################
-
+# 获取主机架构 此处为x86_64
+# uname -m 获取架构
+# shell中 | 表示管道，将左边的输出作为右边的输入
+# sed -e 是替换命令，将管道输入的字符串中的“i.86”替换为“x86”
 HOSTARCH := $(shell uname -m | \
 	sed -e s/i.86/x86/ \
 	    -e s/sun4u/sparc64/ \
@@ -239,6 +249,9 @@ HOSTARCH := $(shell uname -m | \
 	    -e s/macppc/powerpc/\
 	    -e s/sh.*/sh/)
 
+# 获取主机系统 此处为linux
+# uname -s 获取系统
+# tr '[:upper:]' '[:lower:]' 代表将所有的大写字母替换为小写字母
 HOSTOS := $(shell uname -s | tr '[:upper:]' '[:lower:]' | \
 	    sed -e 's/\(cygwin\).*/cygwin/')
 
@@ -247,6 +260,7 @@ export	HOSTARCH HOSTOS
 #########################################################################
 
 # set default to nothing for native builds
+# 主机架构是x86_64，编译的是ARM，所以不相等
 ifeq ($(HOSTARCH),$(ARCH))
 CROSS_COMPILE ?=
 endif
@@ -334,10 +348,11 @@ export KBUILD_CHECKSRC KBUILD_SRC KBUILD_EXTMOD
 
 # We need some generic definitions (do not try to remake the file).
 scripts/Kbuild.include: ;
+# include 命令，读取指定文件的内容
 include scripts/Kbuild.include
 
 # Make variables (CC, etc...)
-
+# 交叉编译工具变量设置
 AS		= $(CROSS_COMPILE)as
 # Always use GNU ld
 ifneq ($(shell $(CROSS_COMPILE)ld.bfd -v 2> /dev/null),)
@@ -373,6 +388,7 @@ KBUILD_AFLAGS   := -D__ASSEMBLY__
 UBOOTRELEASE = $(shell cat include/config/uboot.release 2> /dev/null)
 UBOOTVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
 
+# 将顶层makefile中的变量导出到子makefile
 export VERSION PATCHLEVEL SUBLEVEL UBOOTRELEASE UBOOTVERSION
 export ARCH CPU BOARD VENDOR SOC CPUDIR BOARDDIR
 export CONFIG_SHELL HOSTCC HOSTCFLAGS HOSTLDFLAGS CROSS_COMPILE AS LD CC
@@ -401,6 +417,8 @@ export RCS_TAR_IGNORE := --exclude SCCS --exclude BitKeeper --exclude .svn \
 
 # Basic helpers built in scripts/
 PHONY += scripts_basic
+# @make -f ./scripts/Makefile.build obj=scripts/basic //也可以没有@，视配置而定
+# @rm -f . tmp_quiet_recordmcount                     //也可以没有@
 scripts_basic:
 	$(Q)$(MAKE) $(build)=scripts/basic
 	$(Q)rm -f .tmp_quiet_recordmcount
@@ -413,6 +431,7 @@ PHONY += outputmakefile
 # separate output directory. This allows convenient use of make in the
 # output directory.
 outputmakefile:
+# KBUILD_SRC 为空，所以不执行
 ifneq ($(KBUILD_SRC),)
 	$(Q)ln -fsn $(srctree) source
 	$(Q)$(CONFIG_SHELL) $(srctree)/scripts/mkmakefile \
@@ -427,7 +446,9 @@ endif
 # Detect when mixed targets is specified, and make a second invocation
 # of make so .config is not included in this case either (for *config).
 
+# 此变量保存版本号文件，该文件是自动生成的
 version_h := include/generated/version_autogenerated.h
+# 此变量保存时间戳文件，该文件是自动生成的
 timestamp_h := include/generated/timestamp_autogenerated.h
 
 no-dot-config-targets := clean clobber mrproper distclean \
@@ -438,15 +459,21 @@ config-targets := 0
 mixed-targets  := 0
 dot-config     := 1
 
+# 过滤 MAKECMDGOALS 中符合 no-dot-config-targets 的字符串，如果有，则继续
+# MAKECMDGOALS 是make的一个环境变量，保存指定的终极目标列表
+# 譬如：make mx6ull_emmc_defconfig，那么 MAKECMDGOALS 就是 mx6ull_emmc_defconfig，所以下面条件不成立
 ifneq ($(filter $(no-dot-config-targets), $(MAKECMDGOALS)),)
 	ifeq ($(filter-out $(no-dot-config-targets), $(MAKECMDGOALS)),)
 		dot-config := 0
 	endif
 endif
 
+# KBUILD_EXTMOD 为空，条件成立
 ifeq ($(KBUILD_EXTMOD),)
+        # 过滤 config %config后，为空，条件成立
         ifneq ($(filter config %config,$(MAKECMDGOALS)),)
                 config-targets := 1
+                # MAKECMDGOALS 单词个数为1，条件成立
                 ifneq ($(words $(MAKECMDGOALS)),1)
                         mixed-targets := 1
                 endif
@@ -478,10 +505,13 @@ ifeq ($(config-targets),1)
 KBUILD_DEFCONFIG := sandbox_defconfig
 export KBUILD_DEFCONFIG KBUILD_KCONFIG
 
+# 不匹配，不执行
 config: scripts_basic outputmakefile FORCE
 	$(Q)$(MAKE) $(build)=scripts/kconfig $@
 
+# 匹配，执行
 %config: scripts_basic outputmakefile FORCE
+# @make -f ./scripts/Makefile.build obj=scripts/kconfig xxx_defconfig
 	$(Q)$(MAKE) $(build)=scripts/kconfig $@
 
 else
